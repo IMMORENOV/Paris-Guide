@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paris 2026 Guide — Alice & Nacho</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root{--cream:#FAF7F2;--ink:#2C2824;--warm:#8B7355;--soft:#E8E0D4;--blush:#F0E8DC;--tag-bg:#EDE6DA;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased;}
+.page{max-width:640px;margin:0 auto;padding:60px 28px 80px;}
+header{text-align:center;margin-bottom:32px;padding-bottom:40px;border-bottom:1px solid var(--soft);}
+header .couple{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--warm);font-weight:600;margin-bottom:16px;}
+header h1{font-family:'DM Serif Display',serif;font-size:36px;font-weight:400;line-height:1.2;margin-bottom:20px;}
+header .intro{font-size:15px;color:#6B6158;max-width:500px;margin:0 auto;}
+
+/* Nav */
+.nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:48px;}
+.nav a{display:inline-block;padding:8px 16px;border:1.5px solid var(--soft);border-radius:24px;font-size:13px;font-weight:500;color:var(--warm);text-decoration:none;transition:all .2s;}
+.nav a:hover{background:var(--ink);color:var(--cream);border-color:var(--ink);}
+
+.map-wrapper{margin-bottom:48px;}
+.mc{width:100%;height:440px;border-radius:12px;border:1px solid var(--soft);z-index:1;}
+.leaflet-popup-content-wrapper{font-family:'DM Sans',sans-serif;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);}
+.leaflet-popup-content{margin:10px 14px;font-size:14px;line-height:1.5;}
+.pn{font-weight:600;font-size:15px;margin-bottom:2px;}.pt{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--warm);font-weight:500;}.pa{font-size:12px;color:#8B8078;margin-top:4px;}
+.map-legend{display:flex;justify-content:center;gap:16px;margin-top:12px;font-size:12px;color:#6B6158;flex-wrap:wrap;}
+.map-legend span{display:flex;align-items:center;gap:5px;}
+.ld{width:11px;height:11px;border-radius:50%;display:inline-block;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+
+.section{margin-bottom:44px;}
+.sh{display:flex;align-items:center;gap:14px;margin-bottom:6px;}
+.sh h2{font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;white-space:nowrap;}
+.sh .line{flex:1;height:1px;background:var(--soft);}
+.ss{font-size:13px;color:#9B8E7E;margin-bottom:20px;font-style:italic;}
+
+.resto{padding:16px 12px;border-bottom:1px solid var(--soft);cursor:pointer;transition:background .15s;margin:0 -12px;border-radius:8px;}
+.resto:hover{background:var(--blush);}
+.resto:last-child{border-bottom:none;}
+.rt{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:5px;}
+.rn{font-weight:600;font-size:15.5px;}
+.rtag{font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--warm);background:var(--tag-bg);padding:2px 7px;border-radius:3px;font-weight:500;}
+.rl{font-size:12.5px;color:#9B8E7E;font-style:italic;}
+.rd{font-size:14px;color:#4A4340;}
+.fav{display:inline-block;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;background:var(--ink);color:var(--cream);padding:2px 7px;border-radius:3px;font-weight:600;vertical-align:middle;margin-left:2px;}
+
+/* Part dividers */
+.pdiv{text-align:center;margin:64px 0 48px;padding:32px 0;border-top:1px solid var(--soft);border-bottom:1px solid var(--soft);}
+.pdiv h2{font-family:'DM Serif Display',serif;font-size:30px;font-weight:400;margin-bottom:12px;}
+.pdiv p{font-size:14.5px;color:#6B6158;max-width:480px;margin:0 auto;}
+
+/* Things to do */
+.district{margin-bottom:36px;}
+.district h3{font-family:'DM Serif Display',serif;font-size:19px;font-weight:400;margin-bottom:8px;}
+.district .dloc{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--warm);font-weight:600;margin-bottom:6px;}
+.district p{font-size:14px;color:#4A4340;margin-bottom:8px;}
+.district .tip{background:var(--blush);border-radius:8px;padding:14px 16px;margin:10px 0;font-size:13.5px;color:#4A4340;}
+.district .tip strong{color:var(--ink);}
+.extras{margin-top:8px;}
+.extras-title{font-weight:600;font-size:13px;color:var(--warm);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.extras-list{font-size:14px;color:#4A4340;}
+
+/* Neighbourhood */
+.hoodtip{background:var(--blush);border-radius:10px;padding:20px 22px;margin-bottom:24px;}
+.hoodtip p{font-size:14px;color:#4A4340;margin:0;line-height:1.6;}
+.hoodtip strong{color:var(--ink);}
+.hoodnote{font-size:13px;color:#9B8E7E;font-style:italic;margin-bottom:16px;line-height:1.6;}
+.hoodgrid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:32px;}
+.hoodcol h3{font-family:'DM Serif Display',serif;font-size:17px;font-weight:400;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.hoodcol h3 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.hoodlist{list-style:none;padding:0;margin:0;}
+.hoodlist li{font-size:14px;color:#4A4340;padding:4px 0;cursor:pointer;transition:color .15s;}
+.hoodlist li:hover{color:var(--warm);}
+.hoodlist li.caution{font-style:italic;}
+.hoodlist li.caution::after{content:" *";color:#C2703E;font-size:12px;}
+
+.bookbox{text-align:center;background:var(--blush);border-radius:12px;padding:28px 24px;margin-top:24px;}
+.bookbox p{font-size:14.5px;color:#4A4340;margin-bottom:16px;}
+.bookbox a,.btn{display:inline-block;background:var(--ink);color:var(--cream);padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;letter-spacing:.5px;transition:opacity .2s;}
+.bookbox a:hover,.btn:hover{opacity:.85;}
+
+/* Wedding section */
+.wcard{background:white;border:1px solid var(--soft);border-radius:12px;padding:24px;margin-bottom:20px;}
+.wcard h3{font-family:'DM Serif Display',serif;font-size:18px;font-weight:400;margin-bottom:10px;}
+.wcard p{font-size:14px;color:#4A4340;margin-bottom:6px;}
+.wcard .wdate{font-weight:600;color:var(--ink);font-size:15px;}
+.wcard .wloc{font-size:13px;color:var(--warm);font-style:italic;}
+
+.registry{background:var(--blush);border-radius:12px;padding:28px 24px;margin-top:24px;}
+.registry h3{font-family:'DM Serif Display',serif;font-size:18px;font-weight:400;margin-bottom:12px;text-align:center;}
+.registry .rnote{font-size:14px;color:#4A4340;text-align:center;margin-bottom:20px;line-height:1.6;}
+.rblock{background:white;border-radius:10px;padding:18px 20px;margin-bottom:14px;}
+.rblock:last-child{margin-bottom:0;}
+.rblock .rflag{font-size:15px;margin-bottom:6px;}
+.rblock p{font-size:13px;color:#4A4340;margin:3px 0;line-height:1.5;word-break:break-all;}
+.rblock p strong{color:var(--ink);}
+.rblock .rlabel{font-size:11px;color:var(--warm);text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
+
+footer{text-align:center;margin-top:56px;padding-top:32px;border-top:1px solid var(--soft);font-size:13px;color:#9B8E7E;}
+@media(max-width:480px){.page{padding:40px 20px 60px;}header h1{font-size:28px;}.mc{height:340px;}.hoodgrid{grid-template-columns:1fr;gap:24px;}.pdiv h2{font-size:26px;}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="couple">Alice & Nacho — Paris 2026</div>
+    <h1>Your Guide to Paris</h1>
+    <p class="intro">Everything you need for your trip: where to eat, what to do, where to stay, and all the wedding details. We are so happy you are coming!</p>
+  </header>
+
+  <!-- ===== NAVIGATION ===== -->
+  <nav class="nav" id="top">
+    <a href="#restaurants">Restaurants</a>
+    <a href="#thingstodo">Things to Do</a>
+    <a href="#wheretostay">Where to Stay</a>
+    <a href="#hotels">Hotels</a>
+    <a href="#wedding">Wedding Info</a>
+    <a href="#registry">Registry</a>
+  </nav>
+
+  <!-- ============================================================ -->
+  <!--                   RESTAURANTS                                -->
+  <!-- ============================================================ -->
+  <div class="pdiv" id="restaurants"><h2>Where to Eat & Drink</h2><p>By far the most important question you should ask yourself in Paris. Our top recommendations are below.</p></div>
+
+  <div class="map-wrapper"><div id="restoMap" class="mc"></div>
+    <div class="map-legend">
+      <span><span class="ld" style="background:#6B8E5A;"></span> Quick Bite</span>
+      <span><span class="ld" style="background:#C2703E;"></span> Mid-Range</span>
+      <span><span class="ld" style="background:#B85C5C;"></span> Special</span>
+      <span><span class="ld" style="background:#D4A574;"></span> Coffee & Sweets</span>
+      <span><span class="ld" style="background:#7B6BA5;"></span> Bars</span>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-bottom:40px;">
+    <a href="https://maps.app.goo.gl/oxg9RCXnwPtnBhrL8" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border:1.5px solid var(--soft);border-radius:24px;font-size:13.5px;font-weight:500;color:var(--warm);text-decoration:none;transition:all .2s;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Open all restaurants in Google Maps
+    </a>
+  </div>
+
+  <!-- Quick Bite -->
+  <div class="section"><div class="sh"><h2>Quick Bite</h2><div class="line"></div></div><div class="ss">Under €20 per person</div>
+    <div class="resto" data-id="0"><div class="rt"><span class="rn">Urfa Durum</span><span class="rtag">Kurdish Sandwiches</span></div><div class="rl">Faubourg Saint-Denis, 10th</div><div class="rd">Excellent Kurdish dürüm wraps made right in front of you. A Paris institution.</div></div>
+    <div class="resto" data-id="1"><div class="rt"><span class="rn">Taverne de Zhao</span><span class="rtag">Chinese</span></div><div class="rl">Multiple locations</div><div class="rd">Cheap and satisfying Chinese food. Great noodles and dumplings, generous portions.</div></div>
+    <div class="resto" data-id="2"><div class="rt"><span class="rn">Ravioli Nord Est</span><span class="rtag">Chinese Dumplings</span></div><div class="rl">Multiple locations</div><div class="rd">No-frills handmade dumplings. Try both the steamed and fried versions.</div></div>
+    <div class="resto" data-id="3"><div class="rt"><span class="rn">Dumbo</span><span class="rtag">Smashed Burgers</span><span class="fav">Alice's fav</span></div><div class="rl">Pigalle, 9th</div><div class="rd">Alice's favourite smashed burgers. Crispy edges, juicy patties. Takeaway only.</div></div>
+    <div class="resto" data-id="4"><div class="rt"><span class="rn">PNY</span><span class="rtag">Burgers</span><span class="fav">Nacho's fav</span></div><div class="rl">Multiple locations</div><div class="rd">Nacho's favourite burger spot. Order the Return of the Cowboy with extra jalapeños.</div></div>
+    <div class="resto" data-id="5"><div class="rt"><span class="rn">TranTranZai</span><span class="rtag">Chinese Spicy Noodles</span></div><div class="rl">Multiple locations</div><div class="rd">Spicy, flavourful noodle soups in a lively setting. Big portions, fair prices.</div></div>
+    <div class="resto" data-id="6"><div class="rt"><span class="rn">Focaccia Novettino</span><span class="rtag">Italian Sandwiches</span></div><div class="rl">Multiple locations</div><div class="rd">Sandwiches in fresh focaccia with quality ingredients. Great for a quick, flavourful lunch.</div></div>
+    <div class="resto" data-id="7"><div class="rt"><span class="rn">Alain Miam Miam</span><span class="rtag">Sandwiches</span></div><div class="rl">Le Marais, 3rd</div><div class="rd">Enormous, generously stuffed sandwiches. You choose your own fillings. Expect a queue.</div></div>
+    <div class="resto" data-id="8"><div class="rt"><span class="rn">Mamiche</span><span class="rtag">Boulangerie</span></div><div class="rl">Multiple locations</div><div class="rd">Probably our favourite bakery. Takeaway only. Outstanding beignets, babkas, and savoury options.</div></div>
+  </div>
+  <!-- Good Value -->
+  <div class="section"><div class="sh"><h2>Good Value</h2><div class="line"></div></div><div class="ss">Under €40 per person</div>
+    <div class="resto" data-id="9"><div class="rt"><span class="rn">Sanjo</span><span class="rtag">Ramen</span></div><div class="rl">Near Opéra, 1st</div><div class="rd">Our favourite ramen. Cosy, consistently good, and the Japanese cheesecake is excellent too.</div></div>
+    <div class="resto" data-id="10"><div class="rt"><span class="rn">Udon Kisin</span><span class="rtag">Japanese Udon</span></div><div class="rl">Champs-Élysées area, 8th</div><div class="rd">By far the best udon in town. Handmade noodles in rich broth. Book by phone.</div></div>
+    <div class="resto" data-id="11"><div class="rt"><span class="rn">Maslow</span><span class="rtag">Vegetarian</span></div><div class="rl">Quai de la Mégisserie, 1st</div><div class="rd">Creative vegetarian food with a great atmosphere. Also the team behind Fellows.</div></div>
+    <div class="resto" data-id="12"><div class="rt"><span class="rn">Gruppo Big Mamma</span><span class="rtag">Italian</span></div><div class="rl">10 locations in Paris</div><div class="rd">Fun, buzzy Italian restaurants with genuinely good food at fair prices. Book in advance.</div></div>
+    <div class="resto" data-id="13"><div class="rt"><span class="rn">Le Cambodge</span><span class="rtag">Cambodian</span></div><div class="rl">Canal Saint-Martin, 10th</div><div class="rd">Fresh, flavourful Cambodian food. Close to Brigitte if you want cocktails after.</div></div>
+    <div class="resto" data-id="14"><div class="rt"><span class="rn">Brasserie Dubillot</span><span class="rtag">French Brasserie</span></div><div class="rl">Rue Saint-Denis, 2nd</div><div class="rd">Beautiful brasserie with classic French cooking at fair prices. Also check Bellanger from the same group.</div></div>
+    <div class="resto" data-id="15"><div class="rt"><span class="rn">Panda Panda</span><span class="rtag">Chinese-Inspired</span></div><div class="rl">Rue Juliette Dodu, 10th</div><div class="rd">Creative Chinese-inspired dishes. Flavour-packed with a fun, modern vibe.</div></div>
+    <div class="resto" data-id="16"><div class="rt"><span class="rn">Gros Bao / Petit Bao</span><span class="rtag">Asian Fusion</span></div><div class="rl">Multiple locations</div><div class="rd">Trendy and fairly priced. Skip the baos and go for the dishes: eggplant, broccolini, sweet and sour chicken.</div></div>
+    <div class="resto" data-id="17"><div class="rt"><span class="rn">Oobatz</span><span class="rtag">Pizza</span></div><div class="rl">Avenue Jean Aicard, 11th</div><div class="rd">Trendiest pizzeria we have tried. Thin, crispy, creative. Kudos for the potato pizza.</div></div>
+    <div class="resto" data-id="18"><div class="rt"><span class="rn">Galette</span><span class="rtag">Crêperie</span></div><div class="rl">Batignolles, 17th</div><div class="rd">Excellent savoury buckwheat galettes with quality seasonal ingredients.</div></div>
+  </div>
+  <!-- Splurge -->
+  <div class="section"><div class="sh"><h2>Worth the Splurge</h2><div class="line"></div></div><div class="ss">Around €50 per person</div>
+    <div class="resto" data-id="19"><div class="rt"><span class="rn">Parisik</span><span class="rtag">Korean-French Fusion</span><span class="fav">Alice's #1</span></div><div class="rl">Near Opéra, 2nd</div><div class="rd">Alice's current favourite. Korean-French fusion at its finest. The beef tartare and lobster bisque udon are outstanding.</div></div>
+    <div class="resto" data-id="20"><div class="rt"><span class="rn">Chez Pradel</span><span class="rtag">French Brasserie</span><span class="fav">Nacho's #1</span></div><div class="rl">Rue Ordener, 18th</div><div class="rd">Nacho's favourite. Excellent meat and the best crème brûlée in Paris. Book in advance.</div></div>
+    <div class="resto" data-id="21"><div class="rt"><span class="rn">Pano Pano</span><span class="rtag">Contemporary</span></div><div class="rl">Rue Saint-Maur, 11th</div><div class="rd">One of our latest finds. Excellent beers, the kefta was on point, and the space is beautiful.</div></div>
+  </div>
+  <!-- Coffees -->
+  <div class="section"><div class="sh"><h2>Coffees, Teas & Sweet Bites</h2><div class="line"></div></div>
+    <div class="resto" data-id="22"><div class="rt"><span class="rn">Vague</span><span class="rtag">Coffee / Matcha</span></div><div class="rl">Batignolles, 17th</div><div class="rd">Our neighbourhood coffee spot. Go for the iced matcha.</div></div>
+    <div class="resto" data-id="23"><div class="rt"><span class="rn">%Arabica</span><span class="rtag">Coffee</span></div><div class="rl">Oberkampf, 3rd</div><div class="rd">Beautiful minimalist café with excellent coffee. Kyoto-born brand.</div></div>
+    <div class="resto" data-id="24"><div class="rt"><span class="rn">Kosuyen</span><span class="rtag">Matcha</span></div><div class="rl">Rue Saint-Honoré, 1st</div><div class="rd">The best matcha we have tried in Paris. Small, charming tea house.</div></div>
+    <div class="resto" data-id="25"><div class="rt"><span class="rn">Kodama</span><span class="rtag">Tea House</span></div><div class="rl">Rue Tiquetonne, 2nd</div><div class="rd">Cosy tea shop with an extensive menu. Perfect for a calm break.</div></div>
+    <div class="resto" data-id="26"><div class="rt"><span class="rn">Hôtel Particulier Montmartre</span><span class="rtag">Afternoon Tea</span></div><div class="rl">Avenue Junot, 18th</div><div class="rd">Hidden behind a gate in Montmartre. A magical setting for afternoon tea.</div></div>
+    <div class="resto" data-id="27"><div class="rt"><span class="rn">Pleincoeur</span><span class="rtag">Pâtisserie</span></div><div class="rl">Batignolles, 17th</div><div class="rd">Excellent pastry shop in our neighbourhood. Everything is beautiful and delicious.</div></div>
+    <div class="resto" data-id="28"><div class="rt"><span class="rn">Aux Merveilleux de Fred</span><span class="rtag">Meringue</span></div><div class="rl">Île Saint-Louis area, 4th</div><div class="rd">If you love meringue, this is your place. Warm brioche is also irresistible.</div></div>
+    <div class="resto" data-id="29"><div class="rt"><span class="rn">Babka Zana</span><span class="rtag">Bakery</span></div><div class="rl">Rue Condorcet, 9th</div><div class="rd">Some of the best babkas in Paris. Great morning pastry without the queues.</div></div>
+    <div class="resto" data-id="30"><div class="rt"><span class="rn">Bachir</span><span class="rtag">Lebanese Ice Cream</span></div><div class="rl">Rue Rambuteau, 3rd</div><div class="rd">Lebanese-style ice cream with generous pistachio topping. The ashta flavour is a must.</div></div>
+    <div class="resto" data-id="31"><div class="rt"><span class="rn">Amorino</span><span class="rtag">Gelato</span></div><div class="rl">Multiple locations</div><div class="rd">Italian gelato in flower-shaped cones. A classic Parisian treat.</div></div>
+    <div class="resto" data-id="32"><div class="rt"><span class="rn">Berthillon</span><span class="rtag">Ice Cream / Sorbet</span></div><div class="rl">Île Saint-Louis, 4th</div><div class="rd">The most famous ice cream in Paris. Rich, natural flavours.</div></div>
+    <div class="resto" data-id="33"><div class="rt"><span class="rn">Origines Café</span><span class="rtag">Coffee</span></div><div class="rl">Paris</div><div class="rd">A solid coffee spot worth seeking out.</div></div>
+  </div>
+  <!-- Bars -->
+  <div class="section"><div class="sh"><h2>Bars</h2><div class="line"></div></div>
+    <div class="resto" data-id="34"><div class="rt"><span class="rn">Candelaria</span><span class="rtag">Speakeasy / Mexican</span></div><div class="rl">Le Marais, 3rd</div><div class="rd">Famous speakeasy. The best part is the front: tacos and excellent frozen margaritas.</div></div>
+    <div class="resto" data-id="35"><div class="rt"><span class="rn">Brigitte</span><span class="rtag">Cocktail Bar</span></div><div class="rl">Canal Saint-Martin, 10th</div><div class="rd">Lovely cocktail bar on the canal. They learned how to make piscolas, in case you are homesick.</div></div>
+    <div class="resto" data-id="36"><div class="rt"><span class="rn">Café Biergit</span><span class="rtag">Beer Bar</span></div><div class="rl">Batignolles, 17th</div><div class="rd">German-style beer bar with a great selection and solid burgers.</div></div>
+    <div class="resto" data-id="37"><div class="rt"><span class="rn">A. Noste</span><span class="rtag">Tapas & Wine</span></div><div class="rl">Near Opéra, 2nd</div><div class="rd">Southwestern French tapas with a good wine list. Great for sharing.</div></div>
+    <div class="resto" data-id="38"><div class="rt"><span class="rn">Trufettes</span><span class="rtag">Wine Bar</span></div><div class="rl">Batignolles, 17th</div><div class="rd">Natural wine bar with tasty food. Cosy and intimate.</div></div>
+    <div class="resto" data-id="39"><div class="rt"><span class="rn">Pinettes</span><span class="rtag">Wine / Bar</span></div><div class="rl">Batignolles, 17th</div><div class="rd">Cheap cocktails, great tapas, large terrace. A neighbourhood gem.</div></div>
+    <div class="resto" data-id="40"><div class="rt"><span class="rn">17.45</span><span class="rtag">Wine & Cheese Bar</span></div><div class="rl">Pigalle, 9th</div><div class="rd">Build your own planche from local cheeses and charcuterie. A great way to sample French flavours.</div></div>
+    <div class="resto" data-id="41"><div class="rt"><span class="rn">L'Intrépide</span><span class="rtag">Beer Bar</span></div><div class="rl">Pigalle, 9th</div><div class="rd">Neighbourhood beer bar. Good for a relaxed pint.</div></div>
+    <div class="resto" data-id="42"><div class="rt"><span class="rn">LBF</span><span class="rtag">Beer Bar</span></div><div class="rl">Near Montmartre, 18th</div><div class="rd">Craft brewery bar with around 15 beers on tap.</div></div>
+    <div class="resto" data-id="43"><div class="rt"><span class="rn">Mikkeller</span><span class="rtag">Beer Bar</span></div><div class="rl">9th arrondissement</div><div class="rd">Laid-back Danish craft beer bar with 20 taps. You can taste before you commit.</div></div>
+    <div class="resto" data-id="44"><div class="rt"><span class="rn">Le Fumoir</span><span class="rtag">Café / Bar</span></div><div class="rl">Near the Louvre, 1st</div><div class="rd">Elegant spot right by the Louvre. Beautiful interior and a rare find in the area.</div></div>
+    <div class="resto" data-id="45"><div class="rt"><span class="rn">Paname Brewing Company</span><span class="rtag">Brewery</span></div><div class="rl">Canal de l'Ourcq, 19th</div><div class="rd">Brewery right on the water. Great views and house-brewed beers.</div></div>
+    <div class="resto" data-id="46"><div class="rt"><span class="rn">Grande Mosquée de Paris</span><span class="rtag">Tearoom / Lunch</span></div><div class="rl">5th arrondissement</div><div class="rd">Stunning setting for lunch or mint tea in the courtyard. Worth it for the architecture alone.</div></div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--                   THINGS TO DO                               -->
+  <!-- ============================================================ -->
+  <div class="pdiv" id="thingstodo"><h2>Things to Do</h2><p>You already know the classic spots (Tour Eiffel & co). These are ideas for discovering another side of the city, district by district.</p></div>
+
+  <div class="district">
+    <div class="dloc">17th arrondissement</div>
+    <h3>Batignolles</h3>
+    <p>A residential, young, and fairly upscale neighbourhood. You come here if you want authentic Parisian life. It is also a great starting point for exploring Montmartre, the 9th, and the 8th.</p>
+    <p>Enjoy the Parisian shopping streets (Rue Legendre, Rue Lévis, Rue Cardinet), trendy coffee shops, and good restaurants. The area to cover runs roughly from Pont Cardinet station to Boulevard des Batignolles, and from Avenue de Clichy to Rue Lévis and Parc Monceau.</p>
+    <div class="tip"><strong>Local tip:</strong> La Fondation hotel has a rooftop with one of the best views in town. This is also the neighbourhood where we have the most places to recommend.</div>
+  </div>
+
+  <div class="district">
+    <div class="dloc">18th arrondissement</div>
+    <h3>Montmartre</h3>
+    <p>Usually packed with tourists, which can be annoying if done badly. Our favourite time to visit Montmartre is at night, when the Sacré-Coeur is illuminated. Have dinner at Chez Pradel or drinks at Mikkeller, and enjoy the walk back to see Montmartre in a completely different light.</p>
+    <p>If you go during the day, escape the crowds and head to the Hôtel Particulier for tea or a cocktail in the garden. It is a hidden hotel that will make you feel like you are in the countryside in seconds.</p>
+    <p>Wander the streets, visit the Montmartre Museum and the vineyards. For fabric lovers, check out the shops near Marché Saint-Pierre. Walk down Rue des Martyrs for plenty of shops and food stops, and you will quickly arrive in the 9th, a more residential district with fewer tourist traps.</p>
+    <div class="tip"><strong>If you spend the evening:</strong> Check out Pigalle and catch a glimpse of the Moulin Rouge.</div>
+  </div>
+
+  <div class="district">
+    <div class="dloc">9th arrondissement</div>
+    <h3>Pigalle & the 9th</h3>
+    <p>Intertwined with Montmartre but less touristic and with better quality options. Packed with great bars and restaurants along Rue Condorcet, Rue des Martyrs, Rue de Douai, Rue Blanche, and Rue Lafayette.</p>
+    <p>An easy spot to transition to shopping in the 8th (Le Printemps, Galeries Lafayette, and for the food lovers, Lafayette Gourmet), or head towards the 10th to keep exploring trendy shops, restaurants, and bars.</p>
+  </div>
+
+  <div class="district">
+    <div class="dloc">1st & 2nd arrondissements</div>
+    <h3>Opéra & Tuileries</h3>
+    <p>Start with the Opéra Garnier, which is magnificent from the inside. Even better if you manage to get tickets for a show. Then discover Rue Sainte-Anne, the Japanese street of Paris, with countless ramen options (our favourite being Sanjo).</p>
+    <p>Walk through the Palais Royal gardens, and you will find the Louvre, the Musée d'Orsay, and the Tuileries all within reach.</p>
+    <div class="tip"><strong>The very Parisian thing to do:</strong> Grab a drink and sit on the Quai de Seine at golden hour. Guaranteed to make you fall in love with the city.</div>
+  </div>
+
+  <div class="district">
+    <div class="dloc">2nd, 3rd & 4th arrondissements</div>
+    <h3>Sentier & Le Marais</h3>
+    <p>Very touristic, but here you cannot really avoid it. Walk down Rue Montorgueil to see how the French are obsessed with food. Take the old streets to enjoy the architecture (Rue Tiquetonne), and explore the covered passages with their wonderfully random shops.</p>
+    <p>Keep wandering towards Arts et Métiers to reach Le Marais, where you can get lost in the old Paris streets. If you are tired of the crowds, head up to the Haut Marais (towards République and Canal Saint-Martin). If you love the energy, go down towards the Seine, and perhaps even to the Île de la Cité to see Notre-Dame.</p>
+  </div>
+
+  <div class="district">
+    <div class="dloc">10th & 11th arrondissements</div>
+    <h3>République, Canal Saint-Martin & Canal de l'Ourcq</h3>
+    <p>The other very attractive, young, residential district of Paris. You are in the east of the city, which is trendier and more alternative. The offer of cool spots here is overwhelming, and the only thing to do is enjoy it.</p>
+    <p>Some ideas: walk along Canal Saint-Martin, visit Parc des Buttes-Chaumont, explore the streets near Oberkampf, and walk the full length of Rue Saint-Maur. It can get sketchy in some spots: if you feel uncomfortable, change street. The closer you go to central Paris, the better it gets.</p>
+    <div class="tip"><strong>Extras:</strong> Unforgettable nightlife. The Marché de Bastille where you can eat oysters on the spot. Rent a boat on Canal de l'Ourcq.</div>
+  </div>
+
+  <div class="district">
+    <div class="dloc">5th, 6th & 7th arrondissements</div>
+    <h3>Rive Gauche</h3>
+    <p>The other side of the Seine has plenty to offer. We know it less as it is further from where we live and where our friends are, but there are some wonderful spots worth crossing the river for.</p>
+    <div class="extras">
+      <div class="extras-title">Highlights</div>
+      <div class="extras-list">Jardin du Luxembourg, Jardin des Plantes (with its zoo, and very close to the Grande Mosquée for mint tea), the Panthéon, Le Bon Marché and La Grande Épicerie de Paris (a food lover's paradise), Musée Rodin, and the charming neighbourhood of Butte-aux-Cailles.</div>
+    </div>
+  </div>
+
+  <div class="section" style="margin-top:40px;">
+    <div class="sh"><h2>Extra Ideas</h2><div class="line"></div></div>
+    <div class="extras" style="margin-bottom:16px;">
+      <div class="extras-title">Museums</div>
+      <div class="extras-list">Fondation Louis Vuitton (stunning Frank Gehry building in the Bois de Boulogne), Musée d'Orsay (Impressionist masterpieces in a former train station), Musée du Quai Branly (world cultures, right by the Eiffel Tower).</div>
+    </div>
+    <div class="extras">
+      <div class="extras-title">Activities</div>
+      <div class="extras-list">Crazy Horse (cabaret show, very classy), Annette K (swimming pool floating on the Seine).</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--                   WHERE TO STAY                              -->
+  <!-- ============================================================ -->
+  <div class="pdiv" id="wheretostay"><h2>Where to Stay</h2><p>Our advice on the best neighbourhoods to book your accommodation, and a few to avoid.</p></div>
+
+  <div class="hoodtip"><p>We advise staying on what is called the <strong>Rive Droite</strong> (right bank): when you look at a map of Paris, that is the part above the Seine. This is where most of our favourite spots are, and where you will be closest to us and to the wedding venue.</p></div>
+  <div class="hoodnote">A quick note on how Paris works: districts (quartiers) are often named after the closest metro station. There are several districts per arrondissement (20 arrondissements in total), and a single district can overlap several arrondissements.</div>
+
+  <div class="map-wrapper"><div id="hoodMap" class="mc" style="height:400px;"></div>
+    <div class="map-legend">
+      <span><span class="ld" style="background:#5A8F5A;"></span> Recommended</span>
+      <span><span class="ld" style="background:#C75050;"></span> Better to avoid</span>
+    </div>
+  </div>
+
+  <div class="hoodgrid">
+    <div class="hoodcol">
+      <h3><span class="dot" style="background:#5A8F5A;"></span> Recommended</h3>
+      <ul class="hoodlist" id="goodHoods">
+        <li data-hood="0">Batignolles</li><li data-hood="1">Montmartre</li><li data-hood="2">Abbesses</li><li data-hood="3">Lamarck</li><li data-hood="4">Europe</li><li data-hood="5">Saint-Georges</li><li data-hood="6">Pigalle</li><li data-hood="7">Notre-Dame-de-Lorette</li><li data-hood="8">Sentier</li><li data-hood="9">Marais</li><li data-hood="10">Haut Marais</li><li data-hood="11">Bastille</li><li data-hood="12">Canal Saint-Martin</li><li data-hood="13">Parmentier</li><li data-hood="14">Oberkampf</li><li data-hood="15" class="caution">Belleville</li>
+      </ul>
+    </div>
+    <div class="hoodcol">
+      <h3><span class="dot" style="background:#C75050;"></span> Better to avoid</h3>
+      <ul class="hoodlist" id="badHoods">
+        <li data-hood="16">Clignancourt</li><li data-hood="17">Barbès</li><li data-hood="18">Château Rouge</li><li data-hood="19">La Chapelle</li><li data-hood="20">Gare du Nord</li><li data-hood="21">Stalingrad</li><li data-hood="22">La Villette</li>
+      </ul>
+      <p style="font-size:12.5px;color:#9B8E7E;margin-top:12px;font-style:italic;">And anywhere too close to the périphérique (the ring road around Paris).</p>
+    </div>
+  </div>
+  <div class="hoodnote">* Belleville can be great, but it varies a lot from block to block. If you are considering it, send us a message and we will help you check the specific address.</div>
+
+  <div class="bookbox" id="hotels">
+    <p>We have compiled a list of hotels and apartments with availability in early June, all in recommended neighbourhoods and under €200 per night. Finding something affordable in Paris takes effort, so we hope this saves you time!</p>
+    <a href="https://booking.com/mywishlist.html?wl=f015004550b44ce49321179a69a328f8" target="_blank" rel="noopener">View Our Hotel Picks on Booking.com</a>
+  </div>
+
+  <!-- ============================================================ -->
+  <!--                   WEDDING INFO                               -->
+  <!-- ============================================================ -->
+  <div class="pdiv" id="wedding"><h2>Wedding Info</h2><p>The details you need for both celebrations.</p></div>
+
+  <div class="wcard">
+    <h3>Civil Ceremony</h3>
+    <p class="wdate">Thursday 4 June 2026 at 15:00</p>
+    <p class="wloc">Mairie du 17ème, 16-20 Rue des Batignolles, 75017 Paris</p>
+    <p>The official ceremony will be held at the town hall in our neighbourhood, Batignolles. It will be followed by drinks close by.</p>
+  </div>
+
+  <div class="wcard">
+    <h3>Wedding Celebration</h3>
+    <p class="wdate">Saturday 6 June 2026 at 17:00</p>
+    <p class="wloc">Château de Santeny, 2 Route de Marolles, 94440 Santeny</p>
+    <p>The main celebration will take place at a beautiful château just outside Paris. More details on transport and logistics to come.</p>
+  </div>
+
+  <div class="registry" id="registry">
+    <h3>Registry</h3>
+    <p class="rnote">The most important thing for us is that you can be part of the celebration with us. However, if you would like to offer us a gift, we would happily accept a contribution to our honeymoon.</p>
+
+    <div class="rblock">
+      <div class="rflag">🇪🇺 EUR</div>
+      <p class="rlabel">Beneficiaries</p>
+      <p><strong>I. Moreno Vergara & A. Le Sciellour</strong></p>
+      <p class="rlabel" style="margin-top:8px;">IBAN</p>
+      <p><strong>FR76 2823 3000 0194 3026 8861 203</strong></p>
+      <p class="rlabel" style="margin-top:8px;">BIC / SWIFT</p>
+      <p>REVOFRP2</p>
+      <p class="rlabel" style="margin-top:8px;">Bank</p>
+      <p>Revolut Bank UAB — 10 avenue Kléber, 75116 Paris, France</p>
+      <p class="rlabel" style="margin-top:8px;">Quick link</p>
+      <p><a href="https://revolut.me/aliceoh76" target="_blank" rel="noopener" style="color:var(--warm);font-weight:600;">revolut.me/aliceoh76</a></p>
+    </div>
+
+    <div class="rblock">
+      <div class="rflag">🇨🇱 CLP</div>
+      <p class="rlabel">Nombre</p>
+      <p><strong>Ignacio Manuel Moreno Vergara</strong></p>
+      <p class="rlabel" style="margin-top:8px;">RUT</p>
+      <p>18.539.439-5</p>
+      <p class="rlabel" style="margin-top:8px;">Banco</p>
+      <p>Tenpo — Cuenta Vista</p>
+      <p class="rlabel" style="margin-top:8px;">Número de cuenta</p>
+      <p><strong>111118539439</strong></p>
+      <p class="rlabel" style="margin-top:8px;">Correo</p>
+      <p>immoreno.93@gmail.com</p>
+    </div>
+  </div>
+
+  <footer>Made with love for our wedding guests — June 2026<br><a href="#top" style="color:var(--warm);text-decoration:none;font-weight:500;">↑ Back to top</a></footer>
+</div>
+
+<script>
+// ===== RESTAURANT DATA & MAP =====
+const R=[
+{n:"Urfa Durum",t:"Kurdish",lat:48.872382,lng:2.354284,a:"58 Rue du Fbg Saint-Denis, 75010",c:"quick"},
+{n:"Taverne de Zhao",t:"Chinese",lat:48.868946,lng:2.336424,a:"16 Rue Saint-Augustin, 75002",c:"quick"},
+{n:"Ravioli Nord Est",t:"Dumplings",lat:48.840327,lng:2.323971,a:"10 bis Rue de la Gaité, 75014",c:"quick"},
+{n:"Dumbo",t:"Smashed Burgers",lat:48.881652,lng:2.336901,a:"64 Rue J-B Pigalle, 75009",c:"quick"},
+{n:"PNY",t:"Burgers",lat:48.863773,lng:2.362602,a:"1 Rue Perrée, 75003",c:"quick"},
+{n:"TranTranZai",t:"Spicy Noodles",lat:48.844679,lng:2.322107,a:"47 Bd du Montparnasse, 75006",c:"quick"},
+{n:"Focaccia Novettino",t:"Sandwiches",lat:48.852125,lng:2.373847,a:"1 Rue de Charonne, 75011",c:"quick"},
+{n:"Alain Miam Miam",t:"Sandwiches",lat:48.862239,lng:2.361924,a:"26 Rue Charlot, 75003",c:"quick"},
+{n:"Mamiche",t:"Boulangerie",lat:48.880089,lng:2.343542,a:"45 Rue Condorcet, 75009",c:"quick"},
+{n:"Sanjo",t:"Ramen",lat:48.866338,lng:2.333163,a:"29 Rue d'Argenteuil, 75001",c:"mid"},
+{n:"Udon Kisin",t:"Udon",lat:48.870273,lng:2.310504,a:"7-9 Rue de Ponthieu, 75008",c:"mid"},
+{n:"Maslow",t:"Vegetarian",lat:48.858171,lng:2.344263,a:"14 Quai de la Mégisserie, 75001",c:"mid"},
+{n:"Big Mamma",t:"Italian",lat:48.881947,lng:2.334531,a:"20bis Rue de Douai, 75009",c:"mid"},
+{n:"Le Cambodge",t:"Cambodian",lat:48.872078,lng:2.366108,a:"10 Av. Richerand, 75010",c:"mid"},
+{n:"Brasserie Dubillot",t:"French",lat:48.868079,lng:2.351985,a:"222 Rue Saint-Denis, 75002",c:"mid"},
+{n:"Panda Panda",t:"Chinese",lat:48.875408,lng:2.369104,a:"21 Rue Juliette Dodu, 75010",c:"mid"},
+{n:"Gros Bao",t:"Asian Fusion",lat:48.871493,lng:2.365787,a:"72 Quai de Jemmapes, 75010",c:"mid"},
+{n:"Oobatz",t:"Pizza",lat:48.864735,lng:2.381838,a:"4bis Av. Jean Aicard, 75011",c:"mid"},
+{n:"Galette",t:"Crêperie",lat:48.884522,lng:2.326099,a:"18 Rue Biot, 75017",c:"mid"},
+{n:"Parisik",t:"Korean-French",lat:48.869182,lng:2.334464,a:"3 Rue de la Michodière, 75002",c:"special"},
+{n:"Chez Pradel",t:"Brasserie",lat:48.893945,lng:2.335060,a:"168 Rue Ordener, 75018",c:"special"},
+{n:"Pano Pano",t:"Contemporary",lat:48.868286,lng:2.374803,a:"153 Rue Saint-Maur, 75011",c:"special"},
+{n:"Vague",t:"Coffee",lat:48.886377,lng:2.317704,a:"76 Rue Boursault, 75017",c:"sweet"},
+{n:"%Arabica",t:"Coffee",lat:48.862514,lng:2.367162,a:"26 Bd des Filles du Calvaire, 75003",c:"sweet"},
+{n:"Kosuyen",t:"Matcha",lat:48.864215,lng:2.333683,a:"258 Rue Saint-Honoré, 75001",c:"sweet"},
+{n:"Kodama",t:"Tea",lat:48.864782,lng:2.348171,a:"30 Rue Tiquetonne, 75002",c:"sweet"},
+{n:"Hôtel Particulier",t:"Afternoon Tea",lat:48.887870,lng:2.335324,a:"23 Av. Junot, 75018",c:"sweet"},
+{n:"Pleincoeur",t:"Pâtisserie",lat:48.886462,lng:2.318660,a:"64 Rue des Batignolles, 75017",c:"sweet"},
+{n:"Aux Merveilleux",t:"Meringue",lat:48.855711,lng:2.356415,a:"24 Rue du Pont Louis-Philippe, 75004",c:"sweet"},
+{n:"Babka Zana",t:"Bakery",lat:48.880248,lng:2.341303,a:"65 Rue Condorcet, 75009",c:"sweet"},
+{n:"Bachir",t:"Ice Cream",lat:48.861791,lng:2.351450,a:"58 Rue Rambuteau, 75003",c:"sweet"},
+{n:"Amorino",t:"Gelato",lat:48.853008,lng:2.345743,a:"16 Rue de la Huchette, 75005",c:"sweet"},
+{n:"Berthillon",t:"Ice Cream",lat:48.851723,lng:2.356735,a:"31 Rue Saint-Louis en l'Île, 75004",c:"sweet"},
+null,
+{n:"Candelaria",t:"Speakeasy",lat:48.862983,lng:2.364031,a:"52 Rue de Saintonge, 75003",c:"bar"},
+{n:"Brigitte",t:"Cocktails",lat:48.872000,lng:2.366563,a:"12 Rue Marie et Louise, 75010",c:"bar"},
+{n:"Café Biergit",t:"Beer",lat:48.883586,lng:2.323321,a:"8 Rue des Batignolles, 75017",c:"bar"},
+{n:"A. Noste",t:"Tapas & Wine",lat:48.869212,lng:2.339169,a:"6 bis Rue du 4 Septembre, 75002",c:"bar"},
+{n:"Trufettes",t:"Wine Bar",lat:48.885760,lng:2.321495,a:"31 Rue Truffaut, 75017",c:"bar"},
+{n:"Pinettes",t:"Wine / Bar",lat:48.893373,lng:2.325126,a:"21 Rue de La Jonquière, 75017",c:"bar"},
+{n:"17.45",t:"Wine & Cheese",lat:48.880404,lng:2.334878,a:"49 Rue J-B Pigalle, 75009",c:"bar"},
+{n:"L'Intrépide",t:"Beer",lat:48.882946,lng:2.332909,a:"37 Rue Pierre Fontaine, 75009",c:"bar"},
+{n:"LBF",t:"Beer",lat:48.882977,lng:2.337683,a:"6 Rue André Antoine, 75018",c:"bar"},
+{n:"Mikkeller",t:"Beer",lat:48.878626,lng:2.345358,a:"32 Rue M. de Rochechouart, 75009",c:"bar"},
+{n:"Le Fumoir",t:"Café / Bar",lat:48.860426,lng:2.340925,a:"6 Rue de l'Amiral de Coligny, 75001",c:"bar"},
+{n:"Paname Brewing",t:"Brewery",lat:48.887832,lng:2.378790,a:"41 bis Quai de la Loire, 75019",c:"bar"},
+{n:"Mosquée de Paris",t:"Tearoom",lat:48.841663,lng:2.355659,a:"39 Rue Geoffroy-Saint-Hilaire, 75005",c:"bar"},
+];
+const CC={quick:"#6B8E5A",mid:"#C2703E",special:"#B85C5C",sweet:"#D4A574",bar:"#7B6BA5"};
+const rM=L.map('restoMap',{scrollWheelZoom:false}).setView([48.870,2.342],13);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OSM © CARTO',maxZoom:18}).addTo(rM);
+const mk=R.map(r=>{if(!r)return null;const c=CC[r.c];const i=L.divIcon({className:'',html:`<div style="width:13px;height:13px;border-radius:50%;background:${c};border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,.3);"></div>`,iconSize:[13,13],iconAnchor:[6.5,6.5],popupAnchor:[0,-9]});const m=L.marker([r.lat,r.lng],{icon:i}).addTo(rM);m.bindPopup(`<div class="pn">${r.n}</div><div class="pt">${r.t}</div><div class="pa">${r.a}</div>`);return m;});
+document.querySelectorAll('.resto[data-id]').forEach(e=>{e.addEventListener('click',()=>{const i=+e.dataset.id;if(mk[i]){rM.setView([R[i].lat,R[i].lng],16,{animate:true});mk[i].openPopup();document.getElementById('restoMap').scrollIntoView({behavior:'smooth',block:'center'});}});});
+
+// ===== NEIGHBOURHOOD MAP =====
+const H=[
+{n:"Batignolles",lat:48.887,lng:2.320,g:1},{n:"Montmartre",lat:48.886,lng:2.341,g:1},{n:"Abbesses",lat:48.884,lng:2.339,g:1},{n:"Lamarck",lat:48.890,lng:2.339,g:1},{n:"Europe",lat:48.879,lng:2.323,g:1},{n:"Saint-Georges",lat:48.878,lng:2.338,g:1},{n:"Pigalle",lat:48.882,lng:2.337,g:1},{n:"Notre-Dame-de-Lorette",lat:48.876,lng:2.339,g:1},{n:"Sentier",lat:48.868,lng:2.346,g:1},{n:"Marais",lat:48.858,lng:2.362,g:1},{n:"Haut Marais",lat:48.864,lng:2.358,g:1},{n:"Bastille",lat:48.853,lng:2.368,g:1},{n:"Canal Saint-Martin",lat:48.869,lng:2.367,g:1},{n:"Parmentier",lat:48.865,lng:2.375,g:1},{n:"Oberkampf",lat:48.864,lng:2.369,g:1},{n:"Belleville",lat:48.872,lng:2.377,g:1},
+{n:"Clignancourt",lat:48.898,lng:2.345,g:0},{n:"Barbès",lat:48.884,lng:2.350,g:0},{n:"Château Rouge",lat:48.887,lng:2.349,g:0},{n:"La Chapelle",lat:48.884,lng:2.360,g:0},{n:"Gare du Nord",lat:48.881,lng:2.356,g:0},{n:"Stalingrad",lat:48.884,lng:2.366,g:0},{n:"La Villette",lat:48.897,lng:2.387,g:0},
+];
+const hM=L.map('hoodMap',{scrollWheelZoom:false}).setView([48.875,2.348],13);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OSM © CARTO',maxZoom:18}).addTo(hM);
+const hk=H.map(h=>{const cl=h.g?"#5A8F5A":"#C75050";const sz=28;const i=L.divIcon({className:'',html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${cl}22;border:2.5px solid ${cl};display:flex;align-items:center;justify-content:center;"><div style="width:10px;height:10px;border-radius:50%;background:${cl};"></div></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],popupAnchor:[0,-sz/2]});const m=L.marker([h.lat,h.lng],{icon:i}).addTo(hM);m.bindPopup(`<div class="pn">${h.n}</div><div class="pt">${h.g?"Recommended":"Better to avoid"}</div>`);return m;});
+document.querySelectorAll('.hoodlist li[data-hood]').forEach(e=>{e.addEventListener('click',()=>{const i=+e.dataset.hood;hM.setView([H[i].lat,H[i].lng],15,{animate:true});hk[i].openPopup();document.getElementById('hoodMap').scrollIntoView({behavior:'smooth',block:'center'});});});
+
+// ===== SMOOTH SCROLL NAV =====
+document.querySelectorAll('.nav a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth',block:'start'});});});
+</script>
+</body>
+</html>
